@@ -22,6 +22,9 @@ void loop() {
   }
 }
 
+/**
+* this method updates all ports in acordance with the RGBset Array
+**/
 void updateLights(){
 	for (int i = 0; i<numberOfStrips; i++){
 		if(RGBset[i][3] == 0){ //if mode is set to 0 aka static colour
@@ -30,21 +33,31 @@ void updateLights(){
 	}
 }
 
+/**
+* overloaded method that sets RGB values to first element in array
+**/
 void RGB(int red, int green, int blue){
 	RGB(0, red, green, blue);
 }
 
+
+/**
+* this method sets PWN outputs to produce desired colour
+**/
 void RGB(int index, int red, int green, int blue){
 	analogWrite(RGBpins[index][0], red);
 	analogWrite(RGBpins[index][1], green);
 	analogWrite(RGBpins[index][2], blue);
 }
 
-/*
+/**
+*method that try's to read the next controll string
+*returns true if it updated the RGBset array in any way
+*
 *format for input is "S(indexOfStrip),(velueRed),(velueGreen),(velueBlue),(mode)E"
 *example is "S0,0,0,0,1E" which should set strip 0 into mode 1
 *example is "S0,255,0,255,0E" which should set strip 0 to colour 255, 0, 255 which should be purple
-*/
+**/
 bool readSerial(){
 	if (Serial.find("S")){
 		int index = Serial.parseInt();
