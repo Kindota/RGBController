@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace RGBControllerCommunicator
 {
-    interface RGBComponentInterface
+    public interface RGBComponentInterface
     {
-        int cycles
+        int Cycles
         {
             get;
         }
 
-        float resolution
+        float Resolution
         {
             get;
         }
