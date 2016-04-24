@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO.Ports;
 using System.Threading;
 using System.Management;
+using System.Collections.Concurrent;
 
 namespace RGBControllerCommunicator
 {
@@ -19,10 +20,7 @@ namespace RGBControllerCommunicator
         private int _cycles;
         private float _resolution;
 
-        private int _red;
-        private int _green;
-        private int _blue;
-        private int _mode;
+        private BlockingCollection<string> buffer;
 
         public int Cycles
         {
@@ -42,17 +40,24 @@ namespace RGBControllerCommunicator
 
         public ArduinoRGBController()
         {
-
+            _serialPort = null;
+            _cycles = 0;
+            _resolution = 255;
+            buffer = new BlockingCollection<string>();
+            _communicationThread = new Thread(commWorker);
+            _communicationThread.Start();
         }
 
         public void setColor(float red, float green, float blue)
         {
-            throw new NotImplementedException();
+            string message = String.Format("S0,{0},{1},{2},0E", red, green, blue);
+            buffer.Add(message);
         }
 
         public void setCycle(int number)
         {
-            throw new NotImplementedException();
+            string message = String.Format("S0,0,0,0,{0}E", number);
+            buffer.Add(message);
         }
 
         private string[] getArduinoPorts()
@@ -64,14 +69,40 @@ namespace RGBControllerCommunicator
 
             foreach (ManagementObject item in searcher.Get())
             {
-                string descriptor = item["Descriptor"].ToString();
+                string descriptor = item["Description"].ToString();
                 string deviceId = item["DeviceID"].ToString();
                 if (descriptor.Contains("Arduino"))
                 {
+                    Console.WriteLine("Arduino found on port: " + deviceId);
                     portNames.Add(deviceId);
                 }
             }
             return portNames.ToArray();
+        }
+        /// <summary>
+        /// main worker thread that starts the port and sedn all information
+        /// </summary>
+        private void commWorker()
+        {
+            string[] arduinos = getArduinoPorts();
+            _serialPort = new SerialPort(arduinos[0], 9600);
+            _serialPort.DtrEnable = true;
+            Console.WriteLine("Opening");
+            _serialPort.Open();
+            string initializationMessage = _serialPort.ReadLine();
+            Console.WriteLine(initializationMessage);
+            string[] segments = initializationMessage.Split(' ');
+
+            if (segments[0].Contains("RGBControllerVersion:") && segments[2].Contains("numberOfStrips:"))
+            {
+                Console.WriteLine("Found the RGB COntroller");
+                Console.WriteLine(String.Format("Version: {0}", segments[3]));
+            }
+
+            while (true)
+            {
+                _serialPort.Write(buffer.Take());
+            }
         }
     }
 }
