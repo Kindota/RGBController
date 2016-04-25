@@ -10,7 +10,7 @@ using System.Collections.Concurrent;
 
 namespace RGBControllerCommunicator
 {
-    public class ArduinoRGBController : RGBComponentInterface
+    class ArduinoRGBController
     {
         //example os string I can send "S0,255,0,255,0E"
 
@@ -18,6 +18,7 @@ namespace RGBControllerCommunicator
         private SerialPort _serialPort;
         private Thread _communicationThread;
         private int _cycles;
+        private int _numberOfStrips;
         private float _resolution;
 
         private BlockingCollection<string> buffer;
@@ -38,25 +39,39 @@ namespace RGBControllerCommunicator
             }
         }
 
+        public int NumberOfStrips
+        {
+            get
+            {
+                return _numberOfStrips;
+            }
+        }
+
         public ArduinoRGBController()
         {
             _serialPort = null;
             _cycles = 0;
+            _numberOfStrips = 0;
             _resolution = 255;
             buffer = new BlockingCollection<string>();
             _communicationThread = new Thread(commWorker);
-            _communicationThread.Start();
+            //_communicationThread.Start();
+
+            if (connect())
+            {
+                _communicationThread.Start();
+            }
         }
 
-        public void setColor(float red, float green, float blue)
+        public void setColor(int strip, int red, int green, int blue)
         {
-            string message = String.Format("S0,{0},{1},{2},0E", red, green, blue);
+            string message = String.Format("S{0},{1},{2},{3},0E", strip, red, green, blue);
             buffer.Add(message);
         }
 
-        public void setCycle(int number)
+        public void setCycle(int strip, int number)
         {
-            string message = String.Format("S0,0,0,0,{0}E", number);
+            string message = String.Format("S{0},0,0,0,{1}E", strip, number);
             buffer.Add(message);
         }
 
@@ -79,25 +94,51 @@ namespace RGBControllerCommunicator
             }
             return portNames.ToArray();
         }
+
+        private bool connect()
+        {
+            string[] arduinos = getArduinoPorts();
+            if (arduinos.Length == 0)
+            {
+                Console.WriteLine("No Ardino's detected!");
+                return false;
+            }
+            if (arduinos.Length > 1)
+            {
+                Console.WriteLine("Multiple Ardino's detected!");
+                return false; // just for safety reasons
+            }
+            //init serial port
+            _serialPort = new SerialPort(arduinos[0]);
+            _serialPort.BaudRate = 9600;
+            _serialPort.DtrEnable = true;
+            try
+            {
+                _serialPort.Open();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Console.WriteLine("Serial Port already in use");
+                return false;
+            }
+            string initMessage = _serialPort.ReadLine();
+            string[] segments = initMessage.Split(' ');
+            if (!(segments[0] == "RGBControllerVersion:" && segments[2] == "numberOfStrips:"))
+            {
+                Console.WriteLine("Initialization string wrong. Connection failed");
+                _serialPort.Close();
+                _serialPort = null;
+                return false;
+            }
+            _numberOfStrips = Int32.Parse(segments[3]);
+            return true;
+        }
+
         /// <summary>
         /// main worker thread that starts the port and sedn all information
         /// </summary>
         private void commWorker()
         {
-            string[] arduinos = getArduinoPorts();
-            _serialPort = new SerialPort(arduinos[0], 9600);
-            _serialPort.DtrEnable = true;
-            Console.WriteLine("Opening");
-            _serialPort.Open();
-            string initializationMessage = _serialPort.ReadLine();
-            Console.WriteLine(initializationMessage);
-            string[] segments = initializationMessage.Split(' ');
-
-            if (segments[0].Contains("RGBControllerVersion:") && segments[2].Contains("numberOfStrips:"))
-            {
-                Console.WriteLine("Found the RGB COntroller");
-                Console.WriteLine(String.Format("Version: {0}", segments[3]));
-            }
 
             while (true)
             {

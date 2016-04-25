@@ -14,16 +14,16 @@ namespace TestingConsoleAplication
         {
             Console.WriteLine("Hello");
 
-            RGBComponentInterface controller = new ArduinoRGBController();
+            IRGBComponent[] controller = RGBComponentProvider.getRGBComponents();
 
             while (true)
             {
                 Console.WriteLine("Press button to turn on");
                 Console.ReadKey();
-                controller.setColor(255, 255, 255);
+                controller[0].setColor(255, 255, 255);
                 Console.WriteLine("Press button to turn off");
                 Console.ReadKey();
-                controller.setColor(0, 0, 0);
+                controller[0].setColor(0, 0, 0);
             }
         }
     }
