@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RGBControllerCommunicator",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingConsoleAplication", "TestingConsoleAplication\TestingConsoleAplication.csproj", "{FC14C686-7A3A-40CC-B57A-61D5A07031B2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hue Light", "Hue Light\Hue Light.csproj", "{BED711E5-FFFA-49F3-827E-7A5E37037352}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{FC14C686-7A3A-40CC-B57A-61D5A07031B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC14C686-7A3A-40CC-B57A-61D5A07031B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC14C686-7A3A-40CC-B57A-61D5A07031B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BED711E5-FFFA-49F3-827E-7A5E37037352}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BED711E5-FFFA-49F3-827E-7A5E37037352}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BED711E5-FFFA-49F3-827E-7A5E37037352}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BED711E5-FFFA-49F3-827E-7A5E37037352}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

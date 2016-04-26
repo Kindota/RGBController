@@ -55,8 +55,6 @@ namespace RGBControllerCommunicator
             _resolution = 255;
             buffer = new BlockingCollection<string>();
             _communicationThread = new Thread(commWorker);
-            //_communicationThread.Start();
-
             if (connect())
             {
                 _communicationThread.Start();
